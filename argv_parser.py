@@ -22,6 +22,11 @@ class argv_parser:
         :param settings: словарь с настройками
         :return: None
         '''
+        if (self.__count_words_of_body != 0) & (settings[self.__flags.get_headers_flag()]["Content-Length"] is None):
+            raise Exception('Вы не указали заголовок Content-Length! \n'
+                            f'Для того, чтобы посмотреть справку'
+                            f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}')
+
         if not self.__url:
             raise Exception('Вы не указали url!\n'
                             f'Для того, чтобы посмотреть справку'
