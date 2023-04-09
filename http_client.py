@@ -60,6 +60,18 @@ class http_client:
             value = value.replace('_', ' ')
             headers.append(f'{key}: {value}\r\n')
 
+        cookies = ['Cookie:']
+
+        for key, value in settings[self.__flags.get_cookie_flag()].items():
+            value = value.replace('_', ' ')
+            headers.append(f'{key}={value};')
+
+        cookies = ' '.join(cookies)
+        cookies = cookies[:-1]
+        cookies += '\r\n'
+
+        headers.append(cookies)
+
         headers_str = ' '.join(headers)
         headers_str += '\r\n'
 

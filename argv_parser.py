@@ -15,6 +15,7 @@ class argv_parser:
         self.__request = False
         self.__count_headers = 0
         self.__count_words_of_body = 0
+        self.__count_cookies = 0
 
     def __validate(self, settings: dict) -> None:
         '''
@@ -67,6 +68,25 @@ class argv_parser:
         self.__key = None
         return j
 
+    def __set_cookies(self, settings: dict, index: int) -> int:
+        '''
+        Внутренний метод, который добавляет все cookie в словарь с настройками запроса
+        :param settings: словарь с настройками
+        :param index: текущий индекс в массиве-параметров, на котором мы получили количество cookie
+        :return: новый индекс, на котором мы закончили получать cookie
+        '''
+        j = index + 1
+
+        while j <= (index + 2 * self.__count_cookies):
+            header = self.__argv[j]
+
+            settings[self.__flags.get_headers_flag()][header] = self.__argv[j + 1]
+
+            j += 2
+
+        self.__key = None
+        return j
+
     def __set_body(self, settings: dict, index: int) -> int:
         '''
         Внутренний метод, который добавляет все слова тела запроса в массив в словаре с настройками
@@ -110,11 +130,6 @@ class argv_parser:
 
             if self.__key is None:
                 index += 1
-
-                if item == self.__flags.get_cookie_flag():
-                    settings[self.__flags.get_cookie_flag()] = True
-                    continue
-
                 self.__key = item
                 continue
 
@@ -127,6 +142,11 @@ class argv_parser:
             if self.__key == self.__flags.get_headers_flag():
                 self.__count_headers = int(item)
                 index = self.__set_headers(settings, index)
+                continue
+
+            if self.__key == self.__flags.get_cookie_flag():
+                self.__count_cookies = int(item)
+                index = self.__set_cookies(settings, index)
                 continue
 
             if self.__key == self.__flags.get_body_flag():
