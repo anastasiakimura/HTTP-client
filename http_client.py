@@ -11,6 +11,7 @@ class http_client:
         self.HOST = self.__settings.get(self.__flags.get_url_flag())
         self.PORT = self.__settings.get(self.__flags.get_port_flag())
 
+
     def get_data(self) -> str:
         """
         Получаем и возвращаем данные, полученные по http запросу
@@ -20,14 +21,15 @@ class http_client:
             return self.__flags.get_help_text()
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(10)
-
-            s.connect((self.HOST, self.PORT))
+            # s.connect((self.HOST, self.PORT))
 
             request = self.type_request(self.__settings.get(self.__flags.get_request_flag()))
             request += self.get_headers(self.__settings)
             request += self.__settings.get(self.__flags.get_body_flag())
-            request = bytes(request)
+
+            print(request)
+
+            request = request.encode()
 
             sent = 0
 
@@ -60,19 +62,19 @@ class http_client:
             value = value.replace('_', ' ')
             headers.append(f'{key}: {value}\r\n')
 
-        cookies = ['Cookie:']
+        cookies = []
 
         for key, value in settings[self.__flags.get_cookie_flag()].items():
             value = value.replace('_', ' ')
-            headers.append(f'{key}={value};')
+            cookies.append(f'{key}={value};')
 
-        cookies = ' '.join(cookies)
+        cookies = 'Cookie: ' + '  '.join(cookies)
         cookies = cookies[:-1]
         cookies += '\r\n'
 
         headers.append(cookies)
 
-        headers_str = ' '.join(headers)
+        headers_str = ''.join(headers)
         headers_str += '\r\n'
 
         return headers_str

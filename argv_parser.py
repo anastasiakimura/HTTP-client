@@ -78,9 +78,9 @@ class argv_parser:
         j = index + 1
 
         while j <= (index + 2 * self.__count_cookies):
-            header = self.__argv[j]
+            cookie = self.__argv[j]
 
-            settings[self.__flags.get_headers_flag()][header] = self.__argv[j + 1]
+            settings[self.__flags.get_cookie_flag()][cookie] = self.__argv[j + 1]
 
             j += 2
 
@@ -121,6 +121,7 @@ class argv_parser:
         settings[self.__flags.get_help_flag()] = False
         settings[self.__flags.get_cookie_flag()] = False
         settings[self.__flags.get_headers_flag()] = dict()
+        settings[self.__flags.get_cookie_flag()] = dict()
         settings[self.__flags.get_body_flag()] = []
 
         index = 0
