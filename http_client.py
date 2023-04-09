@@ -12,6 +12,10 @@ class http_client:
         self.PORT = self.__settings.get(self.__flags.get_port_flag())
 
     def get_data(self) -> str:
+        """
+        Получаем и возвращаем данные, полученные по http запросу
+        :return: декодированные данные в кодировке Windows-1251, полученные по http запросу
+        """
         if self.__settings.get(self.__flags.get_help_flag()):
             return self.__flags.get_help_text()
 
@@ -20,7 +24,10 @@ class http_client:
 
             s.connect((self.HOST, self.PORT))
 
-            request = b"GET / HTTP/1.1\r\nHost:www.google.ru\r\n\r\n"
+            request = self.type_request(self.__settings.get(self.__flags.get_request_flag()))
+            request += self.get_headers(self.__settings)
+            request += self.__settings.get(self.__flags.get_body_flag())
+            request = bytes(request)
 
             sent = 0
 
@@ -35,6 +42,26 @@ class http_client:
             except socket.timeout as e:
                 print(f"Time out! {e=}")
 
-            s.send(b"GET / HTTP/1.1\r\nHost:www.google.ru\r\nConnection: close\r\n\r\n")
+            request = self.type_request(self.__settings.get(self.__flags.get_request_flag()))
+            request += f'Host: {self.__settings.get(self.__flags.get_url_flag())}\r\n'
+            request += 'Connection: close\r\n\r\n'
+
+            s.send(bytes(request))
 
             return response.decode('Windows-1251')
+
+    def type_request(self, request: str) -> str:
+        return f'{request} / HTTP/1.1\r\n'
+
+    def get_headers(self, settings: dict) -> str:
+        headers = list()
+
+        for key, value in settings[self.__flags.get_headers_flag()].items():
+            value = value.replace('_', ' ')
+            headers.append(f'{key}: {value}\r\n')
+
+        headers_str = ' '.join(headers)
+        headers_str += '\r\n'
+
+        return headers_str
+

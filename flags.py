@@ -14,7 +14,7 @@ class cli_flags:
             self.__url, self.__port, self.__request, self.__headers, self.__cookie, self.__timeout, self.__save_in_file, self.__body,
             self.__help
         }
-        self.__accessed_requests_values = {'get', 'post', 'delete', 'patch', 'put'}
+        self.__accessed_requests_values = {'GET', 'POST', 'DELETE', 'PATCH', 'PUT'}
 
     def get_accessed_flags(self):
         '''
