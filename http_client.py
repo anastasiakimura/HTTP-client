@@ -26,9 +26,6 @@ class http_client:
             request = self.type_request(self.__settings.get(self.__flags.get_request_flag()))
             request += self.get_headers(self.__settings)
             request += self.__settings.get(self.__flags.get_body_flag())
-
-            print(request)
-
             request = request.encode()
 
             sent = 0
@@ -44,11 +41,12 @@ class http_client:
             except socket.timeout as e:
                 print(f"Time out! {e=}")
 
-            request = self.type_request(self.__settings.get(self.__flags.get_request_flag()))
-            request += f'Host: {self.__settings.get(self.__flags.get_url_flag())}\r\n'
-            request += 'Connection: close\r\n\r\n'
+            close_request = self.type_request(self.__settings.get(self.__flags.get_request_flag()))
+            close_request += f'Host: {self.__settings.get(self.__flags.get_url_flag())}\r\n'
+            close_request += 'Connection: close\r\n\r\n'
+            close_request.encode()
 
-            s.send(bytes(request))
+            s.send(close_request)
 
             return response.decode('Windows-1251')
 
