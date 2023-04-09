@@ -21,7 +21,7 @@ class http_client:
             return self.__flags.get_help_text()
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            # s.connect((self.HOST, self.PORT))
+            s.connect((self.HOST, self.PORT))
 
             request = self.type_request(self.__settings.get(self.__flags.get_request_flag()))
             request += self.get_headers(self.__settings)
