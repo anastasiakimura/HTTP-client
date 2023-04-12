@@ -1,4 +1,4 @@
-class cli_flags:
+class CLIFlags:
     def __init__(self):
         self.__url = '-u'
         self.__port = '-p'

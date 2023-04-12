@@ -1,4 +1,4 @@
-from flags import cli_flags
+from cli_flags.flags import CLIFlags
 
 
 class CLIParser:
@@ -8,7 +8,7 @@ class CLIParser:
         self.__argv = argv
         self.__key = None
 
-        self.__flags = cli_flags()
+        self.__flags = CLIFlags()
 
         self.__url = False
         self.__port = 80
@@ -24,31 +24,45 @@ class CLIParser:
         :return: None
         '''
 
-        if (self.__count_words_of_body != 0) & (settings[self.__flags.get_headers_flag()].get('Content-Length') is None):
-            raise Exception('Вы не указали заголовок Content-Length! \n'
-                            f'Для того, чтобы посмотреть справку'
-                            f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}')
+        if (self.__count_words_of_body != 0) & (
+                settings[self.__flags.get_headers_flag()].get('Content-Length') is None):
+            raise Exception(
+                'Вы не указали заголовок Content-Length! \n'
+                f'Для того, чтобы посмотреть справку'
+                f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}'
+            )
 
         if not self.__url:
-            raise Exception('Вы не указали url!\n'
-                            f'Для того, чтобы посмотреть справку'
-                            f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}')
+            raise Exception(
+                'Вы не указали url!\n'
+                f'Для того, чтобы посмотреть справку'
+                f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}'
+            )
+
+        if (self.__url is not None) & (settings.get(self.__flags.get_headers_flag()).get('Host') is None):
+            raise Exception('Вы указали на какой url слать запрос, но не указали его в заголовках (заголовок "Host")\n')
 
         if not self.__request:
-            raise Exception('Вы не указали тип запроса!\n'
-                            f'Для того, чтобы посмотреть справку'
-                            f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}')
+            raise Exception(
+                'Вы не указали тип запроса!\n'
+                f'Для того, чтобы посмотреть справку'
+                f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}'
+            )
 
         for key in settings.keys():
             if key not in self.__flags.get_accessed_flags():
-                raise Exception('Вы указали не существующий флаг!\n'
-                                f'Для того, чтобы посмотреть справку'
-                                f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}')
+                raise Exception(
+                    'Вы указали не существующий флаг!\n'
+                    f'Для того, чтобы посмотреть справку'
+                    f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}'
+                )
 
-        if settings[self.__flags.get_request_flag()] not in self.__flags.get_accessed_requests_values():
-            raise Exception('Вы указали некорректное значение запроса!\n'
-                            f'Для того, чтобы посмотреть справку'
-                            f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}')
+        if settings.get(self.__flags.get_request_flag()) not in self.__flags.get_accessed_requests_values():
+            raise Exception(
+                'Вы указали некорректное значение запроса!\n'
+                f'Для того, чтобы посмотреть справку'
+                f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}'
+            )
 
     def __set_headers(self, settings: dict, index: int) -> int:
         '''
@@ -87,6 +101,7 @@ class CLIParser:
 
         self.__key = None
         return j
+
 
     def __set_body(self, settings: dict, index: int) -> int:
         '''

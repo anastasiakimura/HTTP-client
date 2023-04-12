@@ -1,11 +1,12 @@
 import socket
+from os import path
 
-from cli_parser.flags import cli_flags
+from cli_flags.flags import CLIFlags
 
 
 class HttpClient:
     def __init__(self, settings: dict):
-        self.__flags = cli_flags()
+        self.__flags = CLIFlags()
         self.__settings = settings
 
         self.__HOST = self.__settings.get(self.__flags.get_url_flag())
@@ -22,7 +23,15 @@ class HttpClient:
             return self.__flags.get_help_text()
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(10)
+            timeout = 10
+
+            try:
+                if self.__settings.get(self.__flags.get_timeout_flag()) is not None:
+                    timeout = int(self.__settings.get(self.__flags.get_timeout_flag()))
+            except Exception as e:
+                timeout = 10
+
+            s.settimeout(timeout)
             s.connect((self.__HOST, self.__PORT))
 
             request = f'{self.__settings.get(self.__flags.get_request_flag())} / HTTP/1.1\r\n'
@@ -63,7 +72,12 @@ class HttpClient:
             except Exception as e:
                 print('log: ' + str(e))
 
-            return response.decode()
+            response = response.decode()
+
+            if self.__settings.get((self.__flags.get_save_in_file_flag())) is not None:
+                print(self.__save_in_file(response, self.__settings.get((self.__flags.get_save_in_file_flag()))))
+
+            return response
 
     def __get_headers(self, settings: dict) -> str:
         """
@@ -95,3 +109,10 @@ class HttpClient:
 
         return headers_str
 
+    def __save_in_file(self, text: str, file_path: str) -> bool:
+        try:
+            with open(file_path, 'w') as file:
+                file.write(text)
+                return True
+        except Exception as e:
+            return False
