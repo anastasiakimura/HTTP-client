@@ -1,6 +1,6 @@
 import socket
 
-from client.flags import cli_flags
+from cli_parser.flags import cli_flags
 
 
 class HttpClient:
@@ -8,10 +8,10 @@ class HttpClient:
         self.__flags = cli_flags()
         self.__settings = settings
 
-        self.HOST = self.__settings.get(self.__flags.get_url_flag())
-        self.PORT = self.__settings.get(self.__flags.get_port_flag())
+        self.__HOST = self.__settings.get(self.__flags.get_url_flag())
+        self.__PORT = self.__settings.get(self.__flags.get_port_flag())
 
-        self.request = None
+        self.requests_text = None
 
     def get_data(self) -> str:
         """
@@ -23,13 +23,13 @@ class HttpClient:
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(10)
-            s.connect((self.HOST, self.PORT))
+            s.connect((self.__HOST, self.__PORT))
 
             request = f'{self.__settings.get(self.__flags.get_request_flag())} / HTTP/1.1\r\n'
             request += self.__get_headers(self.__settings)
             request += self.__settings.get(self.__flags.get_body_flag())
 
-            self.request = request
+            self.requests_text = request
 
             request = request.encode()
 
@@ -66,6 +66,12 @@ class HttpClient:
             return response.decode()
 
     def __get_headers(self, settings: dict) -> str:
+        """
+        Формирует все заголовки для HTTP запроса
+        :param settings: словарь, в котором должно быть поле '-h', которое является словарем
+         и в нем хранятся все заголовки
+        :return: - строчка со всеми заголовками в нужном формате
+        """
         headers = list()
 
         for key, value in settings[self.__flags.get_headers_flag()].items():

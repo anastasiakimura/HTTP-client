@@ -2,8 +2,6 @@ import socket
 
 from threading import Thread
 
-from client.http_client import HttpClient
-
 
 class TestServer:
     def __init__(self):
@@ -32,29 +30,5 @@ class TestServer:
                 except Exception as e:
                     print('log: ' + str(e))
 
-    def __run_client(self) -> tuple:
-        settings = {
-            '-u': '127.0.0.1',
-            '-p': 4444,
-            '-c': {
-                'name': 'ilya',
-                'surname': 'fomko'
-            },
-            '-h': {
-                'Host': '127.0.0.1'
-            },
-            '-b': 'Привет, мир!',
-            '-help': False,
-            '-r': 'GET'
-        }
-
-        client = HttpClient(settings)
-
-        result = (client.get_data(), client.request)
-
-        return result
-
     def test(self):
         Thread(target=self.__run_server).start()
-
-        return self.__run_client()
