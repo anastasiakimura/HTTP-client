@@ -1,6 +1,6 @@
 import unittest
 
-from cli_flags.flags import CLIFlags
+from cli_flags.cli_flags import CLIFlags
 from cli_parser.cli_parser import CLIParser
 from client.http_client import HttpClient
 from test_server import TestServer
