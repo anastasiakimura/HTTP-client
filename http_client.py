@@ -11,7 +11,6 @@ class http_client:
         self.HOST = self.__settings.get(self.__flags.get_url_flag())
         self.PORT = self.__settings.get(self.__flags.get_port_flag())
 
-
     def get_data(self) -> str:
         """
         Получаем и возвращаем данные, полученные по http запросу
@@ -21,17 +20,18 @@ class http_client:
             return self.__flags.get_help_text()
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(10)
             s.connect((self.HOST, self.PORT))
 
-            request = self.type_request(self.__settings.get(self.__flags.get_request_flag()))
-            request += self.get_headers(self.__settings)
+            request = f'{self.__settings.get(self.__flags.get_request_flag())} / HTTP/1.1\r\n'
+            request += self.__get_headers(self.__settings)
             request += self.__settings.get(self.__flags.get_body_flag())
             request = request.encode()
 
-            sent = 0
+            send = 0
 
-            while sent < len(request):
-                sent = sent + s.send(request[sent:])
+            while send < len(request):
+                send = send + s.send(request[send:])
 
             response = b""
 
@@ -39,21 +39,18 @@ class http_client:
                 while True:
                     response = response + s.recv(4096)
             except socket.timeout as e:
-                print(f"Time out! {e=}")
+                pass
 
-            close_request = self.type_request(self.__settings.get(self.__flags.get_request_flag()))
+            close_request = f'{self.__settings.get(self.__flags.get_request_flag())} / HTTP/1.1\r\n'
             close_request += f'Host: {self.__settings.get(self.__flags.get_url_flag())}\r\n'
             close_request += 'Connection: close\r\n\r\n'
-            close_request.encode()
+            close_request = close_request.encode()
 
             s.send(close_request)
 
-            return response.decode('Windows-1251')
+            return response.decode()
 
-    def type_request(self, request: str) -> str:
-        return f'{request} / HTTP/1.1\r\n'
-
-    def get_headers(self, settings: dict) -> str:
+    def __get_headers(self, settings: dict) -> str:
         headers = list()
 
         for key, value in settings[self.__flags.get_headers_flag()].items():
