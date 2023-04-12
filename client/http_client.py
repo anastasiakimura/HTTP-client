@@ -1,7 +1,6 @@
 import socket
-from os import path
 
-from cli_flags.flags import CLIFlags
+from cli_flags.cli_flags import CLIFlags
 
 
 class HttpClient:
