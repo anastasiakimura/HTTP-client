@@ -66,11 +66,11 @@ class http_client:
             value = value.replace('_', ' ')
             cookies.append(f'{key}={value};')
 
-        cookies = 'Cookie: ' + '  '.join(cookies)
-        cookies = cookies[:-1]
-        cookies += '\r\n'
-
-        headers.append(cookies)
+        if len(cookies) != 0:
+            cookies = 'Cookie: ' + '  '.join(cookies)
+            cookies = cookies[:-1]
+            cookies += '\r\n'
+            headers.append(cookies)
 
         headers_str = ''.join(headers)
         headers_str += '\r\n'

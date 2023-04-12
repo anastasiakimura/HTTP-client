@@ -19,11 +19,12 @@ class argv_parser:
 
     def __validate(self, settings: dict) -> None:
         '''
-        Внутренний метод, который проверяет соответствует ли состояние словаря с настройками действительным параметрам
+        Внутренний метод, который проверяет, соответствует ли состояние словаря с настройками действительным параметрам
         :param settings: словарь с настройками
         :return: None
         '''
-        if (self.__count_words_of_body != 0) & (settings[self.__flags.get_headers_flag()]["Content-Length"] is None):
+
+        if (self.__count_words_of_body != 0) & (settings[self.__flags.get_headers_flag()].get('Content-Length') is None):
             raise Exception('Вы не указали заголовок Content-Length! \n'
                             f'Для того, чтобы посмотреть справку'
                             f' вызовите эту утилиту с флагом {self.__flags.get_help_flag()}')
