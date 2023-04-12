@@ -1,7 +1,7 @@
 from client.flags import cli_flags
 
 
-class argv_parser:
+class ArgvParser:
     def __init__(self, argv: list):
         argv.pop(0)
 

@@ -1,15 +1,17 @@
 import socket
 
-from flags import cli_flags
+from client.flags import cli_flags
 
 
-class http_client:
+class HttpClient:
     def __init__(self, settings: dict):
         self.__flags = cli_flags()
         self.__settings = settings
 
         self.HOST = self.__settings.get(self.__flags.get_url_flag())
         self.PORT = self.__settings.get(self.__flags.get_port_flag())
+
+        self.request = None
 
     def get_data(self) -> str:
         """
@@ -26,27 +28,40 @@ class http_client:
             request = f'{self.__settings.get(self.__flags.get_request_flag())} / HTTP/1.1\r\n'
             request += self.__get_headers(self.__settings)
             request += self.__settings.get(self.__flags.get_body_flag())
+
+            self.request = request
+
             request = request.encode()
 
-            send = 0
-
-            while send < len(request):
-                send = send + s.send(request[send:])
+            try:
+                s.sendall(request)
+            except Exception as e:
+                print('log: ' + str(e))
 
             response = b""
 
             try:
                 while True:
-                    response = response + s.recv(4096)
-            except socket.timeout as e:
+                    data = s.recv(4096)
+
+                    if not data:
+                        break
+
+                    response += data
+            except socket.timeout:
                 pass
+            except Exception as e:
+                print('log: ' + str(e))
 
             close_request = f'{self.__settings.get(self.__flags.get_request_flag())} / HTTP/1.1\r\n'
             close_request += f'Host: {self.__settings.get(self.__flags.get_url_flag())}\r\n'
             close_request += 'Connection: close\r\n\r\n'
             close_request = close_request.encode()
 
-            s.send(close_request)
+            try:
+                s.sendall(close_request)
+            except Exception as e:
+                print('log: ' + str(e))
 
             return response.decode()
 
