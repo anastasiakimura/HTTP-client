@@ -1,4 +1,4 @@
-from flags import cli_flags
+from client.flags import cli_flags
 
 
 class argv_parser:

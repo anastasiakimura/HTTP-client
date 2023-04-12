@@ -1,7 +1,7 @@
 import sys
 
-from argv_parser import argv_parser
-from http_client import http_client
+from parser.argv_parser import argv_parser
+from client.http_client import http_client
 
 if __name__ == '__main__':
     try:
