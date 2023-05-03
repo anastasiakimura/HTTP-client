@@ -162,7 +162,7 @@ class Tests(unittest.TestCase):
         argv = 'main.py -u 127.0.0.1 -p 4444 -h 1 Host 127.0.0.1 -r GET -b 2 Hello, World!'.split(' ')
 
         argv_parser = CLIParser(argv)
-        flags = CLIFlags()
+        flags = CLIFl-+ags()
 
         msg = 'Вы не указали заголовок Content-Length! \n' \
               f'Для того, чтобы посмотреть справку' \

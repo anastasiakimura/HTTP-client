@@ -1,0 +1,119 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Place favicon.ico in the root directory -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="normalize.css">
+  <link rel="stylesheet" href="main.css">
+
+  <script src="main.js"></script>
+</head>
+
+<body>
+  <div class="form_wrapper">
+    <h1 class="form-title">HTTP-Client</h1>
+    <p class="error-message">Ошибка! Вы не ввели либо url, либо port, либо тип запроса!</p>
+    <div class="container form-container">
+      <form class="form">
+        <div class="wrapper url_wrapper">
+          <label id="url_label" for="url">Url-адрес: </label>
+          <input id="url" class="url" type="text" name="url" placeholder="Введите url...">
+        </div>
+        <div class="wrapper port_wrapper">
+          <label id="port_label" for="port">Порт: </label>
+          <input id="port" class="port" type="text" name="port" placeholder="Введите port...">
+        </div>
+        <div class="wrapper timeout_wrapper">
+          <label id="timeout_label" for="timeout">Таймаут: </label>
+          <input id="timeout" class="timeout" type="text" name="timeout" placeholder="Введите таймаут ожидания запроса...">
+        </div>
+        <div class="wrapper request_wrapper">
+          <div class="request-title">Тип запроса: </div>
+          <div class="request-btn_container">
+            <div class="request-container">
+              <div class="request-btn_wrapper">
+                <input type="radio" id="post-request" class="request" name="request">
+                <label for="post-request" class="request">POST</label>
+              </div>
+              <div class="request-btn_wrapper">
+                <input type="radio" id="get-request" class="request" name="request">
+                <label for="get-request" class="request">GET</label>
+              </div>
+            </div>
+            <div class="request-container">
+              <div class="request-btn_wrapper">
+                <input type="radio" id="delete-request" class="request" name="request">
+                <label for="delete-request" class="request">DELETE</label>
+              </div>
+              <div class="request-btn_wrapper">
+                <input type="radio" id="put-request" class="request" name="request">
+                <label for="put-request" class="request">PUT</label>
+              </div>
+            </div>
+            <div class="request-container">
+              <div class="request-btn_wrapper">
+                <input type="radio" id="patch-request" class="request" name="request">
+                <label for="patch-request" class="request">PATCH</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="wrapper headers_wrapper">
+          <div class="label-container">
+            <label for="headers" id="headers_label">Заголовки:</label>
+            <p class="warning_wrapper">
+              <span class="warning_important">*</span>
+              Заголовки должны быть записаны в формате:<br>
+              <span class="warning_ex">Заголовок: значение;</span>
+              <span class="warning_note">И обязательно должны быть разделены точкой с запятой</span>
+            </p>
+          </div>
+          <textarea
+                  name="headers"
+                  id="headers"
+                  class="headers-textarea"
+                  placeholder="Впишите суда заголовки..."
+          ></textarea>
+        </div>
+        <div class="wrapper cookie_wrapper">
+          <div class="label-container">
+            <label for="cookie" id="cookie_label">Cookie:</label>
+            <p class="warning_wrapper">
+              <span class="warning_important">*</span>
+              Cookie должны быть записаны в формате:<br>
+              <span class="warning_ex">Название: значение;</span>
+              <span class="warning_note">И обязательно должны быть разделены точкой с запятой</span>
+            </p>
+          </div>
+          <textarea
+                  name="cookie"
+                  id="cookie"
+                  class="cookie-textarea"
+                  placeholder="Впишите суда Cookie..."
+          ></textarea>
+        </div>
+        <div class="wrapper body_wrapper">
+          <label for="body" id="body_label">Тело запроса:</label>
+          <textarea
+                  name="body"
+                  id="body"
+                  class="body-textarea"
+                  placeholder="Впишите суда тело запроса..."
+          ></textarea>
+        </div>
+        <button class="submit-btn" type="submit">Сделать запрос</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
