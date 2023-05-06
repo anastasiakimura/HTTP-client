@@ -8,8 +8,8 @@ class HttpClient:
         self.__flags = CLIFlags()
         self.__settings = settings
 
-        self.__HOST = self.__settings.get(self.__flags.get_url_flag())
-        self.__PORT = self.__settings.get(self.__flags.get_port_flag())
+        self.__HOST = self.__settings.get("url")
+        self.__PORT = self.__settings.get("port")
 
         self.requests_text = None
 
@@ -18,24 +18,19 @@ class HttpClient:
         Получаем и возвращаем данные, полученные по http запросу
         :return: декодированные данные в кодировке Windows-1251, полученные по http запросу
         """
-        if self.__settings.get(self.__flags.get_help_flag()):
-            return self.__flags.get_help_text()
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             timeout = 10
 
-            try:
-                if self.__settings.get(self.__flags.get_timeout_flag()) is not None:
-                    timeout = int(self.__settings.get(self.__flags.get_timeout_flag()))
-            except Exception as e:
-                timeout = 10
+            if self.__settings.get("timeout") is not None:
+                timeout = self.__settings.get("timeout")
 
             s.settimeout(timeout)
             s.connect((self.__HOST, self.__PORT))
 
-            request = f'{self.__settings.get(self.__flags.get_request_flag())} / HTTP/1.1\r\n'
+            request = f'{self.__settings.get("request")} / HTTP/1.1\r\n'
             request += self.__get_headers(self.__settings)
-            request += self.__settings.get(self.__flags.get_body_flag())
+            request += self.__settings.get("body")
 
             self.requests_text = request
 
@@ -61,8 +56,8 @@ class HttpClient:
             except Exception as e:
                 print('log: ' + str(e))
 
-            close_request = f'{self.__settings.get(self.__flags.get_request_flag())} / HTTP/1.1\r\n'
-            close_request += f'Host: {self.__settings.get(self.__flags.get_url_flag())}\r\n'
+            close_request = f'{self.__settings.get("request")} / HTTP/1.1\r\n'
+            close_request += f'Host: {self.__settings.get("url")}\r\n'
             close_request += 'Connection: close\r\n\r\n'
             close_request = close_request.encode()
 
@@ -73,8 +68,6 @@ class HttpClient:
 
             response = response.decode()
 
-            if self.__settings.get((self.__flags.get_save_in_file_flag())) is not None:
-                print(self.__save_in_file(response, self.__settings.get((self.__flags.get_save_in_file_flag()))))
 
             return response
 
@@ -87,14 +80,12 @@ class HttpClient:
         """
         headers = list()
 
-        for key, value in settings[self.__flags.get_headers_flag()].items():
-            value = value.replace('_', ' ')
+        for key, value in settings["headers"].items():
             headers.append(f'{key}: {value}\r\n')
 
         cookies = []
 
-        for key, value in settings[self.__flags.get_cookie_flag()].items():
-            value = value.replace('_', ' ')
+        for key, value in settings["cookie"].items():
             cookies.append(f'{key}={value};')
 
         if len(cookies) != 0:
