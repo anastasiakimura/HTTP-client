@@ -1,6 +1,7 @@
 
-from server.server import server
+from server.server import HttpServer
 
 if __name__ == '__main__':
-    server()
+    server = HttpServer()
+    server.start()
 

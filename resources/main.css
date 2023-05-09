@@ -251,3 +251,38 @@ textarea::placeholder {
 .form_wrapper.error .error-message {
   display: block;
 }
+
+/* Result styles */
+
+.result-container {
+    flex-direction: column;
+}
+
+.result__text {
+  font-size: 15px;
+  color: #333;
+  font-weight: 400;
+}
+
+.result {
+  display: none;
+}
+
+.result-active {
+  display: block;
+}
+
+.result__title {
+  font-size: 24px;
+  color: #333;
+  font-weight: 700;
+
+  margin: 100px 0 30px 0;
+}
+
+.result__text {
+    width: 100%;
+
+    hyphens: auto;
+    white-space: pre-wrap;
+}

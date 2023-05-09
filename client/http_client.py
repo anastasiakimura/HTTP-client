@@ -9,7 +9,7 @@ class HttpClient:
         self.__settings = settings
 
         self.__HOST = self.__settings.get("url")
-        self.__PORT = self.__settings.get("port")
+        self.__PORT = int(self.__settings.get("port"))
 
         self.requests_text = None
 

@@ -47,9 +47,7 @@ const onSubmit = (event) => {
     fields.headers = parse(fields.headers)
     fields.cookie = parse(fields.cookie)
 
-
     const body = JSON.stringify(fields)
-
 
     fetch('http://127.0.0.1:8080/', {
         method: 'post',
@@ -57,7 +55,19 @@ const onSubmit = (event) => {
             'content-type': 'application/json'
         },
         body: body
-    }).then(response => console.log(response.body))
+    })
+        .then(response => response.text())
+        .then(data => {
+            const result_text = document.querySelector('.result__text');
+            result_text.textContent = data;
+
+            const result = document.querySelector('.result');
+
+            if (!result.classList.contains('result-active')) {
+                result.classList.add('result-active')
+            }
+        }
+    );
 
     return true
 }
