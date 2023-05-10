@@ -68,10 +68,10 @@ class HttpClient:
 
             response = response.decode()
 
-
             return response
 
-    def __get_headers(self, settings: dict) -> str:
+    @staticmethod
+    def __get_headers(settings: dict) -> str:
         """
         Формирует все заголовки для HTTP запроса
         :param settings: словарь, в котором должно быть поле '-h', которое является словарем
@@ -98,11 +98,3 @@ class HttpClient:
         headers_str += '\r\n'
 
         return headers_str
-
-    def __save_in_file(self, text: str, file_path: str) -> bool:
-        try:
-            with open(file_path, 'w') as file:
-                file.write(text)
-                return True
-        except Exception as e:
-            return False
