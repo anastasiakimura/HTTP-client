@@ -1,14 +1,12 @@
 import socket
 
+
 class HttpClient:
     def __init__(self, settings: dict):
-        self.__flags = CLIFlags()
         self.__settings = settings
 
         self.__HOST = self.__settings.get("url")
         self.__PORT = int(self.__settings.get("port"))
-
-        self.requests_text = None
 
     def get_data(self) -> str:
         """
@@ -25,13 +23,7 @@ class HttpClient:
             s.settimeout(timeout)
             s.connect((self.__HOST, self.__PORT))
 
-            request = f'{self.__settings.get("request")} / HTTP/1.1\r\n'
-            request += self.__get_headers(self.__settings)
-            request += self.__settings.get("body")
-
-            self.requests_text = request
-
-            request = request.encode()
+            request = self.create_http_request(self.__settings).encode()
 
             try:
                 s.sendall(request)
@@ -53,10 +45,7 @@ class HttpClient:
             except Exception as e:
                 print('log: ' + str(e))
 
-            close_request = f'{self.__settings.get("request")} / HTTP/1.1\r\n'
-            close_request += f'Host: {self.__settings.get("url")}\r\n'
-            close_request += 'Connection: close\r\n\r\n'
-            close_request = close_request.encode()
+            close_request = self.create_http_close_request(self.__settings).encode()
 
             try:
                 s.sendall(close_request)
@@ -68,7 +57,7 @@ class HttpClient:
             return response
 
     @staticmethod
-    def __get_headers(settings: dict) -> str:
+    def get_headers(settings: dict) -> str:
         """
         Формирует все заголовки для HTTP запроса
         :param settings: словарь, в котором должно быть поле '-h', которое является словарем
@@ -92,6 +81,29 @@ class HttpClient:
             headers.append(cookies)
 
         headers_str = ''.join(headers)
-        headers_str += '\r\n'
 
         return headers_str
+
+    @staticmethod
+    def create_http_request(settings: dict) -> str:
+        """
+        Формирует HTTP запрос к серверу
+        :param settings: настройки HTTP запроса
+        :return: возвращает запрос в формате HTTP
+        """
+        return f'{settings.get("request")} / HTTP/1.1\r\n' + \
+               HttpClient.get_headers(settings) + \
+               '\r\n' + \
+               settings.get("body")
+
+    @staticmethod
+    def create_http_close_request(settings: dict) -> str:
+        """
+        Формирует закрывающий HTTP запрос
+        :param settings: настройки закрывающего запроса
+        :return: возвращает запрос в формате HTTP
+        """
+
+        return f'{settings.get("request")} / HTTP/1.1\r\n' \
+               f'Host: {settings.get("url")}\r\n' \
+               f'Connection: close\r\n\r\n'

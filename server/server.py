@@ -9,6 +9,7 @@ class HttpServer:
     """
     HTTP-сервер, который умеет принимать запросы от клиентов и, используя HttpClient возвращает нужные запросы
     """
+
     def __init__(self):
         self.__HOST = '127.0.0.1'
         self.__PORT = 8080
@@ -34,7 +35,7 @@ class HttpServer:
                     if data.startswith('OPTIONS / HTTP/1.1'):
                         origin = re.search(r'(?<=Origin: )(.+?)(?=\r\n)', data).group(0)
 
-                        response = self.__create_option_response(origin)
+                        response = self.create_option_response(origin)
 
                         conn.sendall(response.encode())
 
@@ -47,31 +48,29 @@ class HttpServer:
 
                     client_data = client.get_data()
 
-                    response = self.__create_response(client_data, origin)
+                    response = self.create_response(client_data, origin)
                     conn.sendall(response.encode())
 
                 print(f'Client with addr {addr} was disconnected')
 
     @staticmethod
-    def __create_option_response(origin: str):
+    def create_option_response(origin: str):
         """
         Создает ответ на OPTION запрос клиента
         :param origin: значение заголовка Origin в Option запросе клиента
         :return: возвращает готовый ответ для клиента в формате протокола HTTP
         """
 
-        response = "HTTP/1.1 200 OK\r\n"
-        response += f"Access-Control-Allow-Origin: {origin}\r\n"
-        response += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n"
-        response += "Access-Control-Allow-Headers: Content-Type\r\n"
-        response += "Connection: keep-alive\r\n"
-        response += "Content-Length: 0\r\n"
-        response += "\r\n"
-
-        return response
+        return f"HTTP/1.1 200 OK\r\n" \
+               f"Access-Control-Allow-Origin: {origin}\r\n" \
+               f"Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n" \
+               f"Access-Control-Allow-Headers: Content-Type\r\n" \
+               f"Connection: keep-alive\r\n" \
+               f"Content-Length: 0\r\n" \
+               f"\r\n"
 
     @staticmethod
-    def __create_response(data: str, origin: str):
+    def create_response(data: str, origin: str):
         """
         Создает ответ на запрос
         :param data: данные, которые будут помещены в тело запроса
@@ -86,8 +85,9 @@ class HttpServer:
                    f'Access-Control-Allow-Origin: {origin}' \
                    f'\r\n\r\n'
 
-        response += json.dumps({
-            'data': data
-        })
+        if len(data) != 0:
+            response += json.dumps({
+                'data': data
+            })
 
         return response
