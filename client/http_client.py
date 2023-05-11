@@ -1,8 +1,5 @@
 import socket
 
-from cli_flags.cli_flags import CLIFlags
-
-
 class HttpClient:
     def __init__(self, settings: dict):
         self.__flags = CLIFlags()

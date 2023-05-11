@@ -6,6 +6,9 @@ from client.http_client import HttpClient
 
 
 class HttpServer:
+    """
+    HTTP-сервер, который умеет принимать запросы от клиентов и, используя HttpClient возвращает нужные запросы
+    """
     def __init__(self):
         self.__HOST = '127.0.0.1'
         self.__PORT = 8080
