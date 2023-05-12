@@ -75,7 +75,7 @@ class HttpClient:
             cookies.append(f'{key}={value};')
 
         if len(cookies) != 0:
-            cookies = 'Cookie: ' + '  '.join(cookies)
+            cookies = 'Cookie: ' + ' '.join(cookies)
             cookies = cookies[:-1]
             cookies += '\r\n'
             headers.append(cookies)

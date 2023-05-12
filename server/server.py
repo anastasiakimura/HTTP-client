@@ -44,14 +44,37 @@ class HttpServer:
                     body = re.search(r'(?<=\r\n\r\n)(.+)', data).group(0)
                     settings = json.loads(body)
 
-                    client = HttpClient(settings)
+                    if not HttpServer.validate_body(settings):
+                        response = HttpServer.create_bad_request_response(
+                            origin,
+                            'Вы не ввели либо url, либо тип запроса'
+                        )
+                        conn.sendall(response.encode())
+                    else:
+                        client = HttpClient(settings)
+                        client_data = client.get_data()
 
-                    client_data = client.get_data()
-
-                    response = self.create_response(client_data, origin)
-                    conn.sendall(response.encode())
+                        response = HttpServer.create_ok_request_response(client_data, origin)
+                        conn.sendall(response.encode())
 
                 print(f'Client with addr {addr} was disconnected')
+
+    @staticmethod
+    def validate_body(body: dict):
+        """
+        Проверяет является ли тело запроса валидным
+        :return: возвращает либо True, либо False
+        """
+
+        if \
+                body.get('url') is None or \
+                body.get('request') is None or \
+                type(body.get('cookie')) != dict or \
+                type(body.get('headers')) != dict or \
+                type(body.get('body')) != str:
+            return False
+
+        return True
 
     @staticmethod
     def create_option_response(origin: str):
@@ -70,15 +93,17 @@ class HttpServer:
                f"\r\n"
 
     @staticmethod
-    def create_response(data: str, origin: str):
+    def create_response(code: int, code_message: str, data: str, origin: str,):
         """
-        Создает ответ на запрос
-        :param data: данные, которые будут помещены в тело запроса
+        Создает ответ на пользовательский запрос
+        :param code: код ответа
+        :param code_message: код ответа
+        :param data: данные в теле ответа (должны быть в json формате)
         :param origin: значение заголовка Origin в Option запросе клиента
-        :return: возвращает готовый ответ для клиента в формате протокола HTTP
+        :return: ответ
         """
 
-        response = f'HTTP/1.1 200 OK\r\n' \
+        response = f'HTTP/1.1 {code} {code_message}\r\n' \
                    f'Content-Type: application/json\r\n' \
                    f'Content-Length: {len(data.encode())}\r\n' \
                    f'Connection: keep-alive\r\n' \
@@ -91,3 +116,27 @@ class HttpServer:
             })
 
         return response
+
+    @staticmethod
+    def create_ok_request_response(data: str, origin: str):
+        """
+        Создает ответ на запрос с кодом успеха
+        :param data: данные, которые будут помещены в тело запроса
+        :param origin: значение заголовка Origin в Option запросе клиента
+        :return: возвращает готовый ответ для клиента в формате протокола HTTP
+        """
+
+        return HttpServer.create_response(200, 'OK', data, origin)
+
+    @staticmethod
+    def create_bad_request_response(origin: str, message: str):
+        """
+        Создает ответ с кодом плохого запроса (bad request)
+        :return:
+        """
+
+        body = dict()
+
+        body['message'] = message
+
+        return HttpServer.create_response(400, "BAD REQUEST", json.dumps(body), origin)
