@@ -49,6 +49,10 @@ const onSubmit = (event) => {
 
     const body = JSON.stringify(fields)
 
+    if (fields.request !== 'get') {
+        fields.get_form = ''
+    }
+
     fetch('http://127.0.0.1:8080/', {
         method: 'post',
         headers: {
@@ -58,16 +62,21 @@ const onSubmit = (event) => {
     })
         .then(response => response.text())
         .then(data => {
-            const result_text = document.querySelector('.result__text');
-            result_text.textContent = data;
+                const result_text = document.querySelector('.result__text');
 
-            const result = document.querySelector('.result');
+                console.log(data)
 
-            if (!result.classList.contains('result-active')) {
-                result.classList.add('result-active')
+                const jsonResponse = JSON.parse(data)
+
+                result_text.textContent = JSON.stringify(jsonResponse)
+
+                const result = document.querySelector('.result');
+
+                if (!result.classList.contains('result-active')) {
+                    result.classList.add('result-active')
+                }
             }
-        }
-    );
+        );
 
     return true
 }
@@ -117,6 +126,18 @@ const parse = (headers) => {
     return response.length === 0 ? {} : response
 }
 
-window.addEventListener('load', () => {
+const radioBtnChecker = e => {
+    if (e.target.tagName.toLowerCase() === 'input' && e.target.id.toLowerCase() === 'get-request') {
+        document.querySelector('#get_form').classList.add('get_form__active');
+        return null
+    }
+
+    document.querySelector('#get_form').classList.remove('get_form__active');
+}
+
+const main = () => {
     document.querySelector('.form').addEventListener('submit', onSubmit)
-})
+    document.querySelector('.request-btn_container').addEventListener('click', radioBtnChecker)
+}
+
+window.addEventListener('load', main)

@@ -20,25 +20,26 @@
 </head>
 
 <body>
-  <div class="form_wrapper">
-    <h1 class="form-title">HTTP-Client</h1>
-    <p class="error-message">Ошибка! Вы не ввели либо url, либо port, либо тип запроса!</p>
-    <div class="container form-container">
-      <form class="form">
-        <div class="wrapper url_wrapper">
-          <label id="url_label" for="url">Url-адрес: </label>
-          <input id="url" class="url" type="text" name="url" placeholder="Введите url...">
-        </div>
-        <div class="wrapper port_wrapper">
-          <label id="port_label" for="port">Порт: </label>
-          <input id="port" class="port" type="text" name="port" placeholder="Введите port...">
-        </div>
-        <div class="wrapper timeout_wrapper">
-          <label id="timeout_label" for="timeout">Таймаут: </label>
-          <input id="timeout" class="timeout" type="text" name="timeout" placeholder="Введите таймаут ожидания запроса...">
-        </div>
-        <div class="wrapper request_wrapper">
-          <div class="request-title">Тип запроса: </div>
+<div class="form_wrapper">
+  <h1 class="form-title">HTTP-Client</h1>
+  <p class="error-message">Ошибка! Вы не ввели либо url, либо port, либо тип запроса!</p>
+  <div class="container form-container">
+    <form class="form">
+      <div class="wrapper url_wrapper">
+        <label id="url_label" for="url">Url-адрес: </label>
+        <input id="url" class="url" type="text" name="url" placeholder="Введите url...">
+      </div>
+      <div class="wrapper port_wrapper">
+        <label id="port_label" for="port">Порт: </label>
+        <input id="port" class="port" type="text" name="port" placeholder="Введите port...">
+      </div>
+      <div class="wrapper timeout_wrapper">
+        <label id="timeout_label" for="timeout">Таймаут: </label>
+        <input id="timeout" class="timeout" type="text" name="timeout" placeholder="Введите таймаут ожидания запроса...">
+      </div>
+      <div class="wrapper request_wrapper">
+        <div class="request-title">Тип запроса: </div>
+        <div class="request_btns">
           <div class="request-btn_container">
             <div class="request-container">
               <div class="request-btn_wrapper">
@@ -67,59 +68,68 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="wrapper headers_wrapper">
-          <div class="label-container">
-            <label for="headers" id="headers_label">Заголовки:</label>
-            <p class="warning_wrapper">
-              <span class="warning_important">*</span>
-              Заголовки должны быть записаны в формате:<br>
-              <span class="warning_ex">Заголовок: значение;</span>
-              <span class="warning_note">И обязательно должны быть разделены точкой с запятой</span>
-            </p>
-          </div>
           <textarea
-                  name="headers"
-                  id="headers"
-                  class="headers-textarea"
-                  placeholder="Впишите суда заголовки..."
+                  name="get_form"
+                  id="get_form"
+                  cols="30"
+                  rows="10"
+                  class="get_form"
+                  placeholder="Введите строку, вхождения которой вы хотите найти..."
           ></textarea>
         </div>
-        <div class="wrapper cookie_wrapper">
-          <div class="label-container">
-            <label for="cookie" id="cookie_label">Cookie:</label>
-            <p class="warning_wrapper">
-              <span class="warning_important">*</span>
-              Cookie должны быть записаны в формате:<br>
-              <span class="warning_ex">Название: значение;</span>
-              <span class="warning_note">И обязательно должны быть разделены точкой с запятой</span>
-            </p>
-          </div>
-          <textarea
-                  name="cookie"
-                  id="cookie"
-                  class="cookie-textarea"
-                  placeholder="Впишите суда Cookie..."
-          ></textarea>
-        </div>
-        <div class="wrapper body_wrapper">
-          <label for="body" id="body_label">Тело запроса:</label>
-          <textarea
-                  name="body"
-                  id="body"
-                  class="body-textarea"
-                  placeholder="Впишите суда тело запроса..."
-          ></textarea>
-        </div>
-        <button class="submit-btn" type="submit">Сделать запрос</button>
-      </form>
-    </div>
-    <div class="result">
-      <div class="container result-container">
-        <h1 class="result__title">Результат запроса:</h1>
-        <p class="result__text"></p>
       </div>
+      <div class="wrapper headers_wrapper">
+        <div class="label-container">
+          <label for="headers" id="headers_label">Заголовки:</label>
+          <p class="warning_wrapper">
+            <span class="warning_important">*</span>
+            Заголовки должны быть записаны в формате:<br>
+            <span class="warning_ex">Заголовок: значение;</span>
+            <span class="warning_note">И обязательно должны быть разделены точкой с запятой</span>
+          </p>
+        </div>
+        <textarea
+                name="headers"
+                id="headers"
+                class="headers-textarea"
+                placeholder="Впишите суда заголовки..."
+        ></textarea>
+      </div>
+      <div class="wrapper cookie_wrapper">
+        <div class="label-container">
+          <label for="cookie" id="cookie_label">Cookie:</label>
+          <p class="warning_wrapper">
+            <span class="warning_important">*</span>
+            Cookie должны быть записаны в формате:<br>
+            <span class="warning_ex">Название: значение;</span>
+            <span class="warning_note">И обязательно должны быть разделены точкой с запятой</span>
+          </p>
+        </div>
+        <textarea
+                name="cookie"
+                id="cookie"
+                class="cookie-textarea"
+                placeholder="Впишите суда Cookie..."
+        ></textarea>
+      </div>
+      <div class="wrapper body_wrapper">
+        <label for="body" id="body_label">Тело запроса:</label>
+        <textarea
+                name="body"
+                id="body"
+                class="body-textarea"
+                placeholder="Впишите суда тело запроса..."
+        ></textarea>
+      </div>
+      <button class="submit-btn" type="submit">Сделать запрос</button>
+    </form>
+  </div>
+  <div class="result">
+    <div class="container result-container">
+      <h1 class="result__title">Результат запроса:</h1>
+      <p class="result__text"></p>
     </div>
   </div>
+</div>
 </body>
 </html>

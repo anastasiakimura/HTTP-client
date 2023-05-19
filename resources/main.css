@@ -115,6 +115,24 @@ textarea::placeholder {
   width: 35%;
 }
 
+.request_btns {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  width: 100%;
+}
+
+.get_form {
+  display: none;
+
+  margin-left: 15px;
+}
+
+.get_form__active {
+  display: block;
+}
+
 /* Wrappers styles */
 
 .form_wrapper {
@@ -255,13 +273,7 @@ textarea::placeholder {
 /* Result styles */
 
 .result-container {
-    flex-direction: column;
-}
-
-.result__text {
-  font-size: 15px;
-  color: #333;
-  font-weight: 400;
+  flex-direction: column;
 }
 
 .result {
@@ -281,8 +293,13 @@ textarea::placeholder {
 }
 
 .result__text {
-    width: 100%;
+  font-size: 15px;
+  color: #333;
+  font-weight: 400;
 
-    hyphens: auto;
-    white-space: pre-wrap;
+  width: 100%;
+
+  hyphens: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }

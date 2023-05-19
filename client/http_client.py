@@ -6,7 +6,7 @@ class HttpClient:
         self.__settings = settings
 
         self.__HOST = self.__settings.get("url")
-        self.__PORT = int(self.__settings.get("port"))
+        self.__PORT = self.__settings.get("port")
 
     def get_data(self) -> str:
         """
@@ -21,7 +21,11 @@ class HttpClient:
                 timeout = self.__settings.get("timeout")
 
             s.settimeout(timeout)
-            s.connect((self.__HOST, self.__PORT))
+
+            try:
+                s.connect((self.__HOST, int(self.__PORT)))
+            except ValueError:
+                return 'Неправильный url адрес или port'
 
             request = self.create_http_request(self.__settings).encode()
 

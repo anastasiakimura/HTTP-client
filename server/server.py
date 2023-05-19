@@ -29,7 +29,8 @@ class HttpServer:
                 print(f'Client connected by addr: {addr}')
 
                 with conn:
-                    data = conn.recv(8190).decode()
+                    data = conn.recv(8192).decode()
+
                     origin = None
 
                     if data.startswith('OPTIONS / HTTP/1.1'):
@@ -49,15 +50,47 @@ class HttpServer:
                             origin,
                             'Вы не ввели либо url, либо тип запроса'
                         )
-                        conn.sendall(response.encode())
+
+                        HttpServer.send_data(conn, response)
                     else:
                         client = HttpClient(settings)
                         client_data = client.get_data()
 
-                        response = HttpServer.create_ok_request_response(client_data, origin)
-                        conn.sendall(response.encode())
+                        if client_data == 'Неправильный url адрес или port':
+                            response = HttpServer.create_bad_request_response(origin, client_data)
+                            HttpServer.send_data(conn, response)
+                        else:
+                            data = client_data
+
+                            if settings.get('request').lower() == 'get' and len(settings.get('get_form')) != 0:
+                                matches = re.finditer(settings.get('get_form'), client_data, re.IGNORECASE)
+                                data = [match.start() for match in matches]
+
+                            response = HttpServer.create_ok_request_response(data, origin)
+                            HttpServer.send_data(conn, response)
 
                 print(f'Client with addr {addr} was disconnected')
+
+    @staticmethod
+    def send_data(conn: socket, response: str) -> int:
+        """
+        Отправляет данные на сервер
+        :param conn: подключение, по которому нужно отправить эти данные
+        :param response: отправляемые данные
+        :return: количество отправленных байт
+        """
+        data_to_send = response.encode('utf-8')
+        bytes_sent = 0
+
+        while bytes_sent < len(data_to_send):
+            sent = conn.send(data_to_send[bytes_sent:])
+
+            if sent == 0:
+                break
+
+            bytes_sent += sent
+
+        return bytes_sent
 
     @staticmethod
     def validate_body(body: dict):
@@ -108,12 +141,7 @@ class HttpServer:
                    f'Content-Length: {len(data.encode())}\r\n' \
                    f'Connection: keep-alive\r\n' \
                    f'Access-Control-Allow-Origin: {origin}' \
-                   f'\r\n\r\n'
-
-        if len(data) != 0:
-            response += json.dumps({
-                'data': data
-            })
+                   f'\r\n\r\n{data}'
 
         return response
 
@@ -126,7 +154,12 @@ class HttpServer:
         :return: возвращает готовый ответ для клиента в формате протокола HTTP
         """
 
-        return HttpServer.create_response(200, 'OK', data, origin)
+        body = dict()
+
+        body['data'] = data
+        body['code'] = 200
+
+        return HttpServer.create_response(body['code'], 'OK', json.dumps(body), origin)
 
     @staticmethod
     def create_bad_request_response(origin: str, message: str):
@@ -138,5 +171,6 @@ class HttpServer:
         body = dict()
 
         body['message'] = message
+        body['code'] = 400
 
-        return HttpServer.create_response(400, "BAD REQUEST", json.dumps(body), origin)
+        return HttpServer.create_response(body['code'], 'BAD REQUEST', json.dumps(body), origin)
