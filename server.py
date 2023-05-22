@@ -2,7 +2,7 @@ import re
 import socket
 import json
 
-from client.http_client import HttpClient
+from http_client import HttpClient
 
 
 class HttpServer:

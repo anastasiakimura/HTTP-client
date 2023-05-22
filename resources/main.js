@@ -64,8 +64,6 @@ const onSubmit = (event) => {
         .then(data => {
                 const result_text = document.querySelector('.result__text');
 
-                console.log(data)
-
                 const jsonResponse = JSON.parse(data)
 
                 result_text.textContent = JSON.stringify(jsonResponse)

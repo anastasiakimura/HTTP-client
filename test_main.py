@@ -1,9 +1,9 @@
 import json
 import unittest
 
-from client.http_client import HttpClient
-from server.server import HttpServer
-from test_server import TestServer
+from http_client import HttpClient
+from server import HttpServer
+from testing_server import TestServer
 
 
 # ToDo: сделать тесты ещё для методов класса HttpClient: create_http_request, create_http_close_request и get_headers
@@ -220,7 +220,9 @@ class Tests(unittest.TestCase):
     def test_create_response_with_body(self):
         code = 200
         code_message = 'OK'
-        body = '{\'message\': \'все супер! ты молодец\'}'
+        body = json.dumps({
+            'message': 'все супер! ты молодец'
+        })
         origin = '127.0.0.1'
 
         expected_result = 'HTTP/1.1 200 OK\r\n' \
@@ -229,7 +231,7 @@ class Tests(unittest.TestCase):
                           'Connection: keep-alive\r\n' \
                           'Access-Control-Allow-Origin: 127.0.0.1' \
                           '\r\n\r\n' + \
-                          json.dumps({'data': body})
+                          f'{body}'
 
         self.assertEqual(HttpServer.create_response(code, code_message, body, origin), expected_result)
 
