@@ -1,12 +1,14 @@
 import socket
 
+from enums.client_messages_response import ClientMessagesResponse
+
 
 class HttpClient:
     def __init__(self, settings: dict):
-        self.__settings = settings
+        self._settings = settings
 
-        self.__HOST = self.__settings.get("url")
-        self.__PORT = self.__settings.get("port")
+        self._HOST = self._settings.get("url")
+        self._PORT = self._settings.get("port")
 
     def get_data(self) -> str:
         """
@@ -17,17 +19,17 @@ class HttpClient:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             timeout = 10
 
-            if self.__settings.get("timeout") is not None:
-                timeout = self.__settings.get("timeout")
+            if self._settings.get("timeout") is not None:
+                timeout = self._settings.get("timeout")
 
             s.settimeout(timeout)
 
             try:
-                s.connect((self.__HOST, int(self.__PORT)))
+                s.connect((self._HOST, int(self._PORT)))
             except ValueError:
-                return 'Неправильный url адрес или port'
+                return str(ClientMessagesResponse.incorrect_url_or_port.value)
 
-            request = self.create_http_request(self.__settings).encode()
+            request = self.create_http_request(self._settings).encode()
 
             try:
                 s.sendall(request)
@@ -49,7 +51,7 @@ class HttpClient:
             except Exception as e:
                 print('log: ' + str(e))
 
-            close_request = self.create_http_close_request(self.__settings).encode()
+            close_request = self.create_http_close_request(self._settings).encode()
 
             try:
                 s.sendall(close_request)

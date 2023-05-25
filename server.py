@@ -2,6 +2,9 @@ import re
 import socket
 import json
 
+from enums.client_messages_response import ClientMessagesResponse
+from enums.requests_names import RequestsNames
+from enums.server_validating_messages import ServerValidatingMessages
 from http_client import HttpClient
 
 
@@ -45,10 +48,12 @@ class HttpServer:
                     body = re.search(r'(?<=\r\n\r\n)(.+)', data).group(0)
                     settings = json.loads(body)
 
-                    if not HttpServer.validate_body(settings):
+                    settings_is_validated = HttpServer.validate_body(settings)
+
+                    if not settings_is_validated[0]:
                         response = HttpServer.create_bad_request_response(
                             origin,
-                            'Вы не ввели либо url, либо тип запроса'
+                            settings_is_validated[1]
                         )
 
                         HttpServer.send_data(conn, response)
@@ -56,13 +61,17 @@ class HttpServer:
                         client = HttpClient(settings)
                         client_data = client.get_data()
 
-                        if client_data == 'Неправильный url адрес или port':
+                        if client_data == ClientMessagesResponse.incorrect_url_or_port.value:
                             response = HttpServer.create_bad_request_response(origin, client_data)
                             HttpServer.send_data(conn, response)
                         else:
                             data = client_data
 
-                            if settings.get('request').lower() == 'get' and len(settings.get('get_form')) != 0:
+                            if (
+                                    settings.get('request').lower() == RequestsNames.get.value
+                                    and
+                                    len(settings.get('get_form')) != 0
+                            ):
                                 matches = re.finditer(settings.get('get_form'), client_data, re.IGNORECASE)
                                 data = [match.start() for match in matches]
 
@@ -93,21 +102,29 @@ class HttpServer:
         return bytes_sent
 
     @staticmethod
-    def validate_body(body: dict):
+    def validate_body(body: dict) -> tuple:
         """
         Проверяет является ли тело запроса валидным
-        :return: возвращает либо True, либо False
+        :return: возвращает tuple, где первый параметр - это true или false: результат валидности,
+        а второй сообщение описывающее результат валидации
         """
 
-        if \
-                body.get('url') is None or \
-                body.get('request') is None or \
-                type(body.get('cookie')) != dict or \
-                type(body.get('headers')) != dict or \
-                type(body.get('body')) != str:
-            return False
+        if body.get('url') is None:
+            return tuple(iterable=[False, ServerValidatingMessages.incorrect_url.value])
 
-        return True
+        if body.get('request') is None:
+            return tuple(iterable=[False, ServerValidatingMessages.incorrect_type_request.value])
+
+        if not isinstance(body.get('cookie'), dict):
+            return tuple(iterable=[False, ServerValidatingMessages.incorrect_format_cookie.value])
+
+        if not isinstance(body.get('headers'), dict):
+            return tuple(iterable=[False, ServerValidatingMessages.incorrect_format_headers.value])
+
+        if not isinstance(body.get('body'), str):
+            return tuple(iterable=[False, ServerValidatingMessages.incorrect_body_type.value])
+
+        return tuple(iterable=[True, ServerValidatingMessages.is_validated.value])
 
     @staticmethod
     def create_option_response(origin: str):
