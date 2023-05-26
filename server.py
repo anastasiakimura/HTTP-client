@@ -110,21 +110,21 @@ class HttpServer:
         """
 
         if body.get('url') is None:
-            return tuple(iterable=[False, ServerValidatingMessages.incorrect_url.value])
+            return False, ServerValidatingMessages.incorrect_url.value
 
         if body.get('request') is None:
-            return tuple(iterable=[False, ServerValidatingMessages.incorrect_type_request.value])
+            return False, ServerValidatingMessages.incorrect_type_request.value
 
         if not isinstance(body.get('cookie'), dict):
-            return tuple(iterable=[False, ServerValidatingMessages.incorrect_format_cookie.value])
+            return False, ServerValidatingMessages.incorrect_format_cookie.value
 
         if not isinstance(body.get('headers'), dict):
-            return tuple(iterable=[False, ServerValidatingMessages.incorrect_format_headers.value])
+            return False, ServerValidatingMessages.incorrect_format_headers.value
 
         if not isinstance(body.get('body'), str):
-            return tuple(iterable=[False, ServerValidatingMessages.incorrect_body_type.value])
+            return False, ServerValidatingMessages.incorrect_body_type.value
 
-        return tuple(iterable=[True, ServerValidatingMessages.is_validated.value])
+        return True, ServerValidatingMessages.is_validated.value
 
     @staticmethod
     def create_option_response(origin: str):
