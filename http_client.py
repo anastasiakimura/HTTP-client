@@ -26,7 +26,7 @@ class HttpClient:
 
             try:
                 s.connect((self._HOST, int(self._PORT)))
-            except ValueError:
+            except (ValueError, socket.gaierror):
                 return str(ClientMessagesResponse.incorrect_url_or_port.value)
 
             request = self.create_http_request(self._settings).encode()
@@ -39,28 +39,57 @@ class HttpClient:
             response = b""
 
             try:
-                while True:
-                    data = s.recv(4096)
-
-                    if not data:
-                        break
-
-                    response += data
+                response = self.receive_data(s)
             except socket.timeout:
                 pass
             except Exception as e:
                 print('log: ' + str(e))
 
-            close_request = self.create_http_close_request(self._settings).encode()
+            close_request = self.create_http_close_request(self._settings)
 
             try:
-                s.sendall(close_request)
+                self.send_data(conn=s, data=close_request)
             except Exception as e:
                 print('log: ' + str(e))
 
             response = response.decode()
 
             return response
+
+    @staticmethod
+    def receive_data(conn: socket) -> bytes:
+        response = b""
+
+        while True:
+            data = conn.recv(4096)
+
+            if not data:
+                break
+
+            response += data
+
+        return response
+
+    @staticmethod
+    def send_data(conn: socket, data: str) -> int:
+        """
+        Отправляет данные клиенту
+        :param conn: подключение, по которому нужно отправить эти данные
+        :param data: отправляемые данные
+        :return: количество отправленных байт
+        """
+        data_to_send = data.encode('utf-8')
+        bytes_sent = 0
+
+        while bytes_sent < len(data_to_send):
+            sent = conn.send(data_to_send[bytes_sent:])
+
+            if sent == 0:
+                break
+
+            bytes_sent += sent
+
+        return bytes_sent
 
     @staticmethod
     def get_headers(settings: dict) -> str:

@@ -17,68 +17,88 @@ class HttpServer:
         self.__HOST = '127.0.0.1'
         self.__PORT = 8080
 
+        self._server = None
+
     def start(self):
         """
         Запускает сервер
         """
 
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((self.__HOST, self.__PORT))
-            s.listen()
+        try:
+            self._create_server()
+        except OSError as e:
+            self.stop()
+            print(e)
 
-            while True:
-                conn, addr = s.accept()
+        if self._server is None:
+            return
 
-                print(f'Client connected by addr: {addr}')
+        self._server.listen()
 
-                with conn:
-                    data = conn.recv(8192).decode()
+        while True:
+            if self._server is None:
+                break
 
-                    origin = None
+            conn, addr = self._server.accept()
 
-                    if data.startswith('OPTIONS / HTTP/1.1'):
-                        origin = re.search(r'(?<=Origin: )(.+?)(?=\r\n)', data).group(0)
+            print(f'Client connected by addr: {addr}')
 
-                        response = self.create_option_response(origin)
+            with conn:
+                data = conn.recv(8192).decode()
 
-                        conn.sendall(response.encode())
+                origin = None
 
-                    data = conn.recv(8190).decode()
+                if data.startswith('OPTIONS / HTTP/1.1'):
+                    origin = re.search(r'(?<=Origin: )(.+?)(?=\r\n)', data).group(0)
 
-                    body = re.search(r'(?<=\r\n\r\n)(.+)', data).group(0)
-                    settings = json.loads(body)
+                    response = self.create_option_response(origin)
 
-                    settings_is_validated = HttpServer.validate_body(settings)
+                    conn.sendall(response.encode())
 
-                    if not settings_is_validated[0]:
-                        response = HttpServer.create_bad_request_response(
-                            origin,
-                            settings_is_validated[1]
-                        )
+                data = conn.recv(8190).decode()
 
+                body = re.search(r'(?<=\r\n\r\n)(.+)', data).group(0)
+                settings = json.loads(body)
+
+                settings_is_validated = HttpServer.validate_params(settings)
+
+                if not settings_is_validated[0]:
+                    response = HttpServer.create_bad_request_response(
+                        origin,
+                        settings_is_validated[1]
+                    )
+
+                    HttpServer.send_data(conn, response)
+                else:
+                    client = HttpClient(settings)
+                    client_data = client.get_data()
+
+                    if client_data == ClientMessagesResponse.incorrect_url_or_port.value:
+                        response = HttpServer.create_bad_request_response(origin, client_data)
                         HttpServer.send_data(conn, response)
                     else:
-                        client = HttpClient(settings)
-                        client_data = client.get_data()
+                        data = client_data
 
-                        if client_data == ClientMessagesResponse.incorrect_url_or_port.value:
-                            response = HttpServer.create_bad_request_response(origin, client_data)
-                            HttpServer.send_data(conn, response)
-                        else:
-                            data = client_data
+                        if (
+                                settings.get('request').lower() == RequestsNames.get.value
+                                and
+                                len(settings.get('get_form')) != 0
+                        ):
+                            matches = re.finditer(settings.get('get_form'), client_data, re.IGNORECASE)
+                            data = [match.start() for match in matches]
 
-                            if (
-                                    settings.get('request').lower() == RequestsNames.get.value
-                                    and
-                                    len(settings.get('get_form')) != 0
-                            ):
-                                matches = re.finditer(settings.get('get_form'), client_data, re.IGNORECASE)
-                                data = [match.start() for match in matches]
+                        response = HttpServer.create_ok_request_response(data, origin)
+                        HttpServer.send_data(conn, response)
 
-                            response = HttpServer.create_ok_request_response(data, origin)
-                            HttpServer.send_data(conn, response)
+            print(f'Client with addr {addr} was disconnected')
 
-                print(f'Client with addr {addr} was disconnected')
+    def _create_server(self):
+        self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._server.bind((self.__HOST, self.__PORT))
+
+    def stop(self):
+        self._server.close()
+        self._server = None
 
     @staticmethod
     def send_data(conn: socket, response: str) -> int:
@@ -102,9 +122,9 @@ class HttpServer:
         return bytes_sent
 
     @staticmethod
-    def validate_body(body: dict) -> tuple:
+    def validate_params(body: dict) -> tuple:
         """
-        Проверяет является ли тело запроса валидным
+        Проверяет являются ли параметры запроса валидными
         :return: возвращает tuple, где первый параметр - это true или false: результат валидности,
         а второй сообщение описывающее результат валидации
         """
