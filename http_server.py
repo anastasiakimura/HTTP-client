@@ -84,13 +84,22 @@ class HttpServer:
                                 and
                                 len(settings.get('get_form')) != 0
                         ):
-                            matches = re.finditer(settings.get('get_form'), client_data, re.IGNORECASE)
-                            data = [match.start() for match in matches]
+                            data = self._take_data(settings, client_data)
 
                         response = HttpServer.create_ok_request_response(data, origin)
                         HttpServer.send_data(conn, response)
 
             print(f'Client with addr {addr} was disconnected')
+
+    @staticmethod
+    def _take_data(settings: dict, client_data: str):
+        if 'application/json' in client_data:
+            matches = re.finditer(settings.get('get_form'), client_data, re.IGNORECASE)
+            data = [match.start() for match in matches]
+
+            return data
+
+        return client_data
 
     def _create_server(self):
         self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
