@@ -1,7 +1,10 @@
 import json
+import re
+import socket
 import unittest
 from unittest.mock import MagicMock
 
+from enums.server_validating_messages import ServerValidatingMessages
 from http_server import HttpServer
 
 
@@ -100,7 +103,7 @@ class TestServer(unittest.TestCase):
             'port': 4444,
             'cookie': 1234,
             'headers': {},
-            'body': '',
+            'body': None,
             'request': 'GET'
         }
 
@@ -158,7 +161,7 @@ class TestServer(unittest.TestCase):
         expected_result = len(data.encode())
 
         socket = MagicMock()
-        socket.send.side_effect = [expected_result, 0]
+        socket.send.side_effect = [expected_result]
 
         self.assertEqual(expected_result, HttpServer.send_data(socket, data))
 
@@ -181,6 +184,45 @@ class TestServer(unittest.TestCase):
 
         self.assertEqual(expected_result, HttpServer.create_ok_request_response(data, origin))
 
+    def test_create_bad_response(self):
+        message = 'Hello, World!'
+        origin = '127.0.0.1'
 
-if __name__ == '__main__':
-    unittest.main()
+        body = dict()
+        body['message'] = message
+        body['code'] = 400
+
+        body_json = json.dumps(body)
+
+        expected_result = f'HTTP/1.1 400 BAD REQUEST\r\n' \
+                          f'Content-Type: application/json\r\n' \
+                          f'Content-Length: {len(body_json.encode())}\r\n' \
+                          f'Connection: keep-alive\r\n' \
+                          f'Access-Control-Allow-Origin: {origin}' \
+                          f'\r\n\r\n{body_json}'
+
+        self.assertEqual(expected_result, HttpServer.create_bad_request_response(origin, message))
+
+    def test_take_data(self):
+        client_data = 'Content-Type: application/json\r\n{"data": "test test test"}'
+        settings = {'get_form': 'test'}
+
+        matches = re.finditer(settings.get('get_form'), client_data, re.IGNORECASE)
+        expected_result = [match.start() for match in matches]
+
+        self.assertEqual(expected_result, HttpServer._take_data(settings, client_data))
+
+    def test_start_working(self):
+        server = HttpServer()
+
+        server._start_server()
+
+        self.assertEqual(True, server._working)
+
+    def test_stop_working(self):
+        server = HttpServer()
+
+        server._start_server()
+        server._stop_server()
+
+        self.assertEqual(False, server._working)

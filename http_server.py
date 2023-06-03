@@ -19,6 +19,8 @@ class HttpServer:
 
         self._server = None
 
+        self._working = None
+
     def start(self):
         """
         Запускает сервер
@@ -35,7 +37,9 @@ class HttpServer:
 
         self._server.listen()
 
-        while True:
+        self._start_server()
+
+        while self._working:
             if self._server is None:
                 break
 
@@ -91,15 +95,24 @@ class HttpServer:
 
             print(f'Client with addr {addr} was disconnected')
 
+    def _stop_server(self):
+        self._working = False
+
+    def _start_server(self):
+        self._working = True
+
+    def stop(self):
+        self._stop_server()
+
     @staticmethod
     def _take_data(settings: dict, client_data: str):
+        data = client_data
+
         if 'application/json' in client_data:
             matches = re.finditer(settings.get('get_form'), client_data, re.IGNORECASE)
             data = [match.start() for match in matches]
 
-            return data
-
-        return client_data
+        return data
 
     def _create_server(self):
         self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -122,9 +135,6 @@ class HttpServer:
 
         while bytes_sent < len(data_to_send):
             sent = conn.send(data_to_send[bytes_sent:])
-
-            if sent == 0:
-                break
 
             bytes_sent += sent
 

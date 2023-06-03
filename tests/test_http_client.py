@@ -187,7 +187,3 @@ class TestClient(unittest.TestCase):
         }
 
         self.assertEqual(str(ClientMessagesResponse.incorrect_url_or_port.value), HttpClient(settings).get_data())
-
-
-if __name__ == '__main__':
-    unittest.main()
