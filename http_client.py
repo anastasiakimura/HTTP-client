@@ -1,12 +1,14 @@
 import socket
 
+from enums.client_messages_response import ClientMessagesResponse
+
 
 class HttpClient:
     def __init__(self, settings: dict):
-        self.__settings = settings
+        self._settings = settings
 
-        self.__HOST = self.__settings.get("url")
-        self.__PORT = int(self.__settings.get("port"))
+        self._HOST = self._settings.get("url")
+        self._PORT = self._settings.get("port")
 
     def get_data(self) -> str:
         """
@@ -17,13 +19,17 @@ class HttpClient:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             timeout = 10
 
-            if self.__settings.get("timeout") is not None:
-                timeout = self.__settings.get("timeout")
+            if self._settings.get("timeout") is not None:
+                timeout = self._settings.get("timeout")
 
             s.settimeout(timeout)
-            s.connect((self.__HOST, self.__PORT))
 
-            request = self.create_http_request(self.__settings).encode()
+            try:
+                s.connect((self._HOST, int(self._PORT)))
+            except (ValueError, socket.gaierror):
+                return str(ClientMessagesResponse.incorrect_url_or_port.value)
+
+            request = self.create_http_request(self._settings).encode()
 
             try:
                 s.sendall(request)
@@ -33,28 +39,57 @@ class HttpClient:
             response = b""
 
             try:
-                while True:
-                    data = s.recv(4096)
-
-                    if not data:
-                        break
-
-                    response += data
+                response = self.receive_data(s)
             except socket.timeout:
                 pass
             except Exception as e:
                 print('log: ' + str(e))
 
-            close_request = self.create_http_close_request(self.__settings).encode()
+            close_request = self.create_http_close_request(self._settings)
 
             try:
-                s.sendall(close_request)
+                self.send_data(conn=s, data=close_request)
             except Exception as e:
                 print('log: ' + str(e))
 
             response = response.decode()
 
             return response
+
+    @staticmethod
+    def receive_data(conn: socket) -> bytes:
+        response = b""
+
+        while True:
+            data = conn.recv(4096)
+
+            if not data:
+                break
+
+            response += data
+
+        return response
+
+    @staticmethod
+    def send_data(conn: socket, data: str) -> int:
+        """
+        Отправляет данные клиенту
+        :param conn: подключение, по которому нужно отправить эти данные
+        :param data: отправляемые данные
+        :return: количество отправленных байт
+        """
+        data_to_send = data.encode('utf-8')
+        bytes_sent = 0
+
+        while bytes_sent < len(data_to_send):
+            sent = conn.send(data_to_send[bytes_sent:])
+
+            if sent == 0:
+                break
+
+            bytes_sent += sent
+
+        return bytes_sent
 
     @staticmethod
     def get_headers(settings: dict) -> str:
@@ -75,7 +110,7 @@ class HttpClient:
             cookies.append(f'{key}={value};')
 
         if len(cookies) != 0:
-            cookies = 'Cookie: ' + '  '.join(cookies)
+            cookies = 'Cookie: ' + ' '.join(cookies)
             cookies = cookies[:-1]
             cookies += '\r\n'
             headers.append(cookies)
